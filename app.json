@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "Indoor Navigator",
+    "slug": "sihnav",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0b0f19"
+    },
+    "android": {
+      "package": "com.indoornavigator.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0b0f19"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "ACTIVITY_RECOGNITION",
+        "HIGH_SAMPLING_RATE_SENSORS",
+        "BODY_SENSORS",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.indoornavigator.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used to capture surroundings for visual re-localization.",
+        "NSLocationWhenInUseUsageDescription": "Used to anchor your GPS position for indoor tracking.",
+        "NSLocationAlwaysUsageDescription": "Used for continuous indoor position tracking while navigating.",
+        "NSMotionUsageDescription": "Used to count steps and detect walking direction."
+      }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        { "cameraPermission": "Allow Indoor Navigator to use the camera for re-localization." }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Indoor Navigator to use your GPS location.",
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Indoor Navigator to save keyframe photos.",
+          "savePhotosPermission": "Allow Indoor Navigator to save navigation data."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": { "projectId": "0de3807f-aca2-4c22-b62e-03e6dc47cda4" }
+    }
+  }
+}
