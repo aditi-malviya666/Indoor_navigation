@@ -1,4 +1,4 @@
-﻿// ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────
 //  ONE-SHOT PERMISSION MANAGER
 //  All permissions requested simultaneously in one call.
 //  Result cached in AsyncStorage — never asked again.
@@ -12,50 +12,43 @@ import { Platform, Alert } from "react-native";
 const PERM_KEY = "indoor_nav_permissions_granted_v1";
 
 export const arePermissionsGranted = async () => {
-  const stored = await AsyncStorage.getItem(PERM_KEY);
-  return stored === "true";
+  try {
+    const stored = await AsyncStorage.getItem(PERM_KEY);
+    return stored === "true";
+  } catch {
+    return false;
+  }
 };
 
 export const requestAllPermissionsAtOnce = async () => {
-  // Already granted before — skip entirely
-  const already = await arePermissionsGranted();
-  if (already) return true;
-
   try {
-    // Fire ALL permission requests simultaneously
-    const results = await Promise.all([
-      Camera.requestCameraPermissionsAsync(),
-      Location.requestForegroundPermissionsAsync(),
-      Location.requestBackgroundPermissionsAsync(),
-      MediaLibrary.requestPermissionsAsync(),
-    ]);
-
-    const [cam, locFg, locBg, media] = results;
-
-    const allGranted =
-      cam.status === "granted" &&
-      locFg.status === "granted" &&
-      media.status === "granted";
-
-    if (allGranted) {
-      // Save permanently — never asked again
-      await AsyncStorage.setItem(PERM_KEY, "true");
-      return true;
-    } else {
-      // Show what was denied
-      const denied = [];
-      if (cam.status !== "granted") denied.push("Camera");
-      if (locFg.status !== "granted") denied.push("Location");
-      if (media.status !== "granted") denied.push("Storage");
-      Alert.alert(
-        "Permissions Required",
-        `Please enable ${denied.join(", ")} in your phone Settings to use this app. Go to Settings → Apps → IndoorNav → Permissions`,
-        [{ text: "OK" }]
-      );
-      return false;
+    // 1. Request Foreground Location (GPS)
+    try {
+      await Location.requestForegroundPermissionsAsync();
+    } catch (e) {
+      console.warn("Location permission error:", e);
     }
+
+    // 2. Request Camera
+    try {
+      await Camera.requestCameraPermissionsAsync();
+    } catch (e) {
+      console.warn("Camera permission error:", e);
+    }
+
+    // 3. Request Media / Storage
+    try {
+      await MediaLibrary.requestPermissionsAsync();
+    } catch (e) {
+      console.warn("MediaLibrary permission error:", e);
+    }
+
+    // Save permanently so the screen never blocks again
+    await AsyncStorage.setItem(PERM_KEY, "true");
+    return true;
   } catch (err) {
     console.error("Permission error:", err);
-    return false;
+    await AsyncStorage.setItem(PERM_KEY, "true");
+    return true;
   }
 };

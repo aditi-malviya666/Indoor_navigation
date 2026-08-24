@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PermissionScreen — Shown ONCE on first launch.
  * Requests all permissions simultaneously. Never shown again.
  */
@@ -21,9 +21,12 @@ export default function PermissionScreen({ navigation }) {
 
   const handleGrant = async () => {
     setLoading(true);
-    const granted = await requestAllPermissionsAtOnce();
-    setLoading(false);
-    if (granted) navigation.replace("Home");
+    try {
+      await requestAllPermissionsAtOnce();
+    } finally {
+      setLoading(false);
+      navigation.replace("Home");
+    }
   };
 
   return (
