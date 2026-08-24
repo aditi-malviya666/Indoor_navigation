@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SensorEngine — Fuses GPS + Accelerometer + Gyroscope + Barometer
  * into continuous (x, y, floor, heading, stepCount, totalDistanceM) updates.
  * All permissions are already granted before this module starts.
@@ -81,22 +81,38 @@ export class SensorEngine {
     this.isRunning = true;
 
     // 1. GPS — continuous position updates
-    this._gpsSub = await Location.watchPositionAsync(
-      { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 0.5 },
-      (pos) => this._onGPS(pos)
-    );
+    try {
+      this._gpsSub = await Location.watchPositionAsync(
+        { accuracy: Location.Accuracy.Balanced, timeInterval: 1000, distanceInterval: 0.5 },
+        (pos) => this._onGPS(pos)
+      );
+    } catch (e) {
+      console.warn("GPS watch error:", e);
+    }
 
     // 2. Accelerometer — step detection at 50Hz
-    Accelerometer.setUpdateInterval(20);
-    this._accelSub = Accelerometer.addListener((data) => this._onAccelerometer(data));
+    try {
+      Accelerometer.setUpdateInterval(20);
+      this._accelSub = Accelerometer.addListener((data) => this._onAccelerometer(data));
+    } catch (e) {
+      console.warn("Accelerometer error:", e);
+    }
 
     // 3. Magnetometer — compass heading
-    Magnetometer.setUpdateInterval(100);
-    this._magnetSub = Magnetometer.addListener((data) => this._onMagnetometer(data));
+    try {
+      Magnetometer.setUpdateInterval(100);
+      this._magnetSub = Magnetometer.addListener((data) => this._onMagnetometer(data));
+    } catch (e) {
+      console.warn("Magnetometer error:", e);
+    }
 
-    // 4. Barometer — floor detection
-    Barometer.setUpdateInterval(1000);
-    this._baroSub = Barometer.addListener((data) => this._onBarometer(data));
+    // 4. Barometer — floor detection (optional hardware)
+    try {
+      Barometer.setUpdateInterval(1000);
+      this._baroSub = Barometer.addListener((data) => this._onBarometer(data));
+    } catch (e) {
+      console.warn("Barometer not available on this device:", e);
+    }
   }
 
   stop() {

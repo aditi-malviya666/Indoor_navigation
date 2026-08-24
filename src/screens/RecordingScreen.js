@@ -1,4 +1,4 @@
-﻿/**
+/**
  * RecordingScreen — Live walk recording with GPS+IMU tracking,
  * real-time trail drawing, and instant label pinning.
  */
@@ -74,10 +74,16 @@ export default function RecordingScreen({ navigation }) {
       });
     });
 
-    // Get first GPS fix for anchor
-    const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.BestForNavigation });
-    anchorRef.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    engine.setInitialAnchor(anchorRef.current.lat, anchorRef.current.lng, 0, 0, 1);
+    // Get first GPS fix for anchor (with safe fallback for indoor start)
+    try {
+      const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      anchorRef.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      engine.setInitialAnchor(anchorRef.current.lat, anchorRef.current.lng, 0, 0, 1);
+    } catch (e) {
+      console.warn("Indoor GPS fix fallback:", e);
+      anchorRef.current = { lat: 0, lng: 0 };
+      engine.setInitialAnchor(0, 0, 0, 0, 1);
+    }
     await engine.start();
     sensorRef.current = engine;
   };
